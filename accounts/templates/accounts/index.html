@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block body %}
+    <br><br><br><br><br><br><br><br>
+    <div class="container">
+        <p class="text-center"><strong>E-Learning</strong></p>
+        {% if user.is_authenticated %}
+        <a href="{% url 'accounts:logout' %}"><p style="text-align:center">Logout</p></a> <br>
+        {% else %}
+        <br>
+        <a href="{% url 'accounts:register' %}"><p style="text-align:center">Register</p></a>
+        <a href="{% url 'accounts:login_request' %}"><p style="text-align:center">Login</p></a>
+        {% endif %}
+    </div>
+{% endblock %}
