@@ -1,41 +1,12 @@
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.models import Group
-from django.http import HttpResponse
-from django.shortcuts import redirect, render
+from django.shortcuts import render
 from django.contrib import messages
 from .form import UserForm, UserInfoForm, EditAccountForm
 from django.contrib.auth.forms import AuthenticationForm
 from django.core.signals import request_finished
 from django.dispatch import receiver
-
-
-def group_required(group):
-    def decorator(view_func):
-        def wrapper_func(request, *args, **kwargs):
-            if request.user.groups.filter(name=group).exists():
-                return view_func(request, *args, **kwargs)
-            else:
-                return HttpResponse("You are not autherized to access this page.")
-        return wrapper_func
-    return decorator
-
-
-def unauthenticated_user(view_func):
-    def wrapper_func(request, *args, **kwargs):
-        if request.user.is_authenticated:
-            return redirect('index')
-        else:
-            return view_func(request, *args, **kwargs)
-    return wrapper_func
-
-
-def anonymous_user(view_func):
-    def wrapper_func(request, *args, **kwargs):
-        if request.user.is_anonymous:
-            return HttpResponse("You are not logged In.")
-        else:
-            return view_func(request, *args, **kwargs)
-    return wrapper_func
+from .decorators import *
 
 
 def logout_view(request):
@@ -60,7 +31,6 @@ def register(request):
 
             profile = profile_form.save(commit=False)
             user_type = profile_form.cleaned_data['user_type']
-            print(user_type)
             group_get, created = Group.objects.get_or_create(name=user_type)
             if not created:
                 user.groups.add(group_get)

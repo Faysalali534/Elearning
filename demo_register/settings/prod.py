@@ -4,7 +4,6 @@ DEBUG = False
 ALLOWED_HOSTS = ['*']
 
 # use white noise
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 DATABASES = {
     'default': {

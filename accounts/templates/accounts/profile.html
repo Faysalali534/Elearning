@@ -4,19 +4,9 @@
 {% block body %}
 <h1>Dashboard</h1>
     <h2>Welcome {{ name }}</h2>
-{% if perms.accounts.delete_userinfo %}
-    <input type="button" value="Add"><br>
-    <input type="button" value="Change"><br>
-    <input type="button" value="Delete"><br>
-    <input type="button" value="Edit"><br>
-{% else %}
-    <p>No Delete Permission</p>
-{% endif %}
-    <a href="{% url 'accounts:logout' %}">Logout</a>
     <section>
         <div class="container">
           <div class="row">
-            <div class="col-md-6 mx-auto">
               <div class="card">
                 <div class="card-header text-black">
                   <h2>Profile</h2>
@@ -31,7 +21,6 @@
                          <br>
                  </div>
                     </div>
-                </div>
               </div>
             </div>
       </section>

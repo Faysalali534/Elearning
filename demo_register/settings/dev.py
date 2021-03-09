@@ -4,7 +4,19 @@ DEBUG = True
 ALLOWED_HOSTS = ['127.0.0.1']
 
 # use white noise
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_URL = '/static/'
+STATIC_DIR = os.path.join('static')
+
+
+DEBUG_TOOLBAR_CONFIG = {
+    'SHOW_TOOLBAR_CALLBACK': lambda r: False,  # disables it
+}
+
+
+STATICFILES_DIRS = [
+    STATIC_DIR,
+]
+
 
 DATABASES = {
     'default': {

@@ -2,7 +2,7 @@
 
 {% load widget_tweaks %}
 
-{% block body %}
+{% block content %}
     <section>
         <div class="container">
           <div class="row">
@@ -33,7 +33,9 @@
                                         {% endfor %}
                              {% endfor %}
                                 <br>
-                                 <input type="submit" value="Register" class="btn btn-block btn-primary">
+                                <div class="d-grid gap-2">
+                                 <input type="submit" value="Register" class="btn btn-outline-primary">
+                                    </div>
                                </div>
                         </form>
                     {% endif %}

@@ -59,6 +59,14 @@ class UserInfoForm(forms.ModelForm):
         fields = ('phone_number', 'location', 'user_type')
 
 
+class UserInfoFormNew(forms.ModelForm):
+    course_name = forms.CharField(required=True)
+
+    class Meta:
+        model = UserInfo
+        fields = ('course_name',)
+
+
 class EditAccountForm(UserChangeForm):
     first_name = forms.CharField(required=True)
     last_name = forms.CharField(required=True)

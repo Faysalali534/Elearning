@@ -1,51 +1,84 @@
 <!DOCTYPE html>
+{% load auth_extras %}
 <html lang="en">
 <head>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Demo Registration</title>
 </head>
 <body>
-    <div class="container">
-            <nav class="navbar navbar-expand-lg navbar-default">
-            <div class="container-fluid">
-              <div class="navbar-header">
-                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-                  <span class="sr-only">Toggle navigation</span>
-                  <span class="icon-bar"></span>
-                  <span class="icon-bar"></span>
-                  <span class="icon-bar"></span>
-                </button>
-                <a class="navbar-brand" href="/">E-Learning</a>
-              </div>
-              <div id="navbar" class="navbar-collapse collapse">
-                {% if user.is_authenticated %}
-                <ul class="nav navbar-nav">
-                    <li><a href="{% url 'accounts:index' %}">Home</a></li>
-                    <li><a href="{% url 'learning_material:course_list' %}">Courses</a></li>
-                    <li><a href="{% url 'accounts:view_profile' %}">Profile</a></li>
-                    <li><a href="{% url 'accounts:edit_profile' %}">Edit Profile</a></li>
-                    <li><a href="{% url 'learning_material:add_course' %}">Add Course</a></li>
-                    <li><a href="{% url 'learning_material:add_lesson' %}">Add Lesson</a></li>
-                </ul>
-                <ul class="nav navbar-nav navbar-right">
-                    <li><a href="{% url 'accounts:logout' %}">Logout</a></li>
-                </ul>
-                {% else %}
-                <ul class="nav navbar-nav navbar-right">
-                  <li><a href="{% url 'accounts:login_request' %}">Login</a></li>
-                  <li><a href="{% url 'accounts:register' %}">Register</a></li>
-                </ul>
-                {% endif %}
-              </div><!--/.nav-collapse -->
-            </div><!--/.container-fluid -->
-          </nav>
-        </div>
+	<nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">E-learning</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          {% if user.is_authenticated %}
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="{% url 'accounts:index' %}">Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link active" aria-current="page" href="{% url 'accounts:view_profile' %}">Profile</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link active" aria-current="page" href="{% url 'accounts:edit_profile' %}">Edit Profile</a>
+            </li>
+            </ul>
+            <ul>
+                    <a class="btn btn-outline-primary" href="{% url 'accounts:logout' %}" role="button">Logout</a>
+            </ul>
+          </ul>
+          {% else %}
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="{% url 'accounts:index' %}">Home</a>
+            </li>
+            </ul>
+            <ul>
+                    <a class="btn btn-outline-primary" href="{% url 'accounts:login_request' %}" role="button">Login</a>
+                    <a class="btn btn-outline-primary" href="{% url 'accounts:register' %}" role="button">Register</a>
 
-    {% block body %}
-    {% endblock %}
+            </ul>
+           {% endif %}
+        </div>
+      </div>
+    </nav>
+    {% if user.is_authenticated %}
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-2 border pt-3">
+                    <div class="d-flex flex-column bd-highlight mb-3">
+                        {% if request.user|has_group:"professor" %}
+                            <a class="btn btn-outline-primary mt-3" href="{% url 'accounts:view_profile' %}" role="button">Profile</a>
+                            <a class="btn btn-outline-primary mt-3" href="{% url 'learning_material:course_list' %}" role="button">Courses</a>
+                            <a class="btn btn-outline-primary mt-3" href="{% url 'learning_material:add_course' %}" role="button">Add Course</a>
+                            <a class="btn btn-outline-primary mt-3" href="{% url 'learning_material:course_list' %}" role="button">Add Lesson</a>
+                            <a class="btn btn-outline-primary mt-3" href="{% url 'accounts:edit_profile' %}" role="button">Edit Profile</a>
+                        {% elif request.user|has_group:"student"%}
+                            <h1>Profile</h1>
+                            <a class="btn btn-outline-primary mt-3" href="{% url 'accounts:view_profile' %}" role="button">Profile</a>
+                            <a class="btn btn-outline-primary mt-3" href="{% url 'accounts:edit_profile' %}" role="button">Edit Profile</a>
+                            <br>
+                            <h1>Curriculum</h1>
+                            <a class="btn btn-outline-primary mt-3" href="{% url 'learning_material:all_courses_detail' %}" role="button">My Courses</a>
+                            <a class="btn btn-outline-primary mt-3" href="{% url 'learning_material:all_courses_detail' %}" role="button">Offered Courses</a>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-10">
+                    {% block body %}
+                    {% endblock %}
+                </div>
+            </div>
+        </div>
+    {% else %}
+        {% block content %}
+        {% endblock %}
+    {% endif %}
+
 </body>
 <script
       src="https://code.jquery.com/jquery-3.1.1.min.js"

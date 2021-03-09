@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% load auth_extras %}
+{% load widget_tweaks %}
+{% block body %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-2 border pt-3">
+            <div class="d-flex flex-column bd-highlight mb-3">
+                {% if request.user|has_group:"professor" %}
+
+                    <a class="btn btn-outline-primary mt-3" href="{% url 'accounts:view_profile' %}" role="button">Profile</a>
+                    <a class="btn btn-outline-primary mt-3" href="{% url 'learning_material:course_list' %}" role="button">Courses</a>
+                    <a class="btn btn-outline-primary mt-3" href="{% url 'learning_material:add_course' %}" role="button">Add Course</a>
+                    <a class="btn btn-outline-primary mt-3" href="{% url 'learning_material:add_lesson' %}" role="button">Add Lesson</a>
+                    <a class="btn btn-outline-primary mt-3" href="{% url 'accounts:edit_profile' %}" role="button">Edit Profile</a>
+                {% endif %}
+            </div>
+        </div>
+        <div class="col-10">
+            <div class="card">
+                <div class="card-header text-black">
+                  <h2>Profile</h2>
+                </div>
+                <div class="card-body">
+                          <p> User Name    : {{ user.username }}<br> </p>
+                          <p> First Name   : {{ user.first_name }}<br> </p>
+                          <p> Last Name    : {{ user.last_name }}<br> </p>
+                          <p> Email        : {{ user.email }}<br> </p>
+                          <p> Phone Number : {{ user.profile.phone_number }}<br> </p>
+                          <p> Location     : {{ user.profile.location }}<br> </p>
+                         <br>
+                 </div>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+{% for enrollment_data in enroll_students_list %}
+    {% for enroll in enrollment_data %}
+       {{ enroll.course_id }} - {{ enroll.student_id }}
+    {% endfor %}
+<br><br>
+{% endfor %}
+{% for lesson in lessons %}
+    <div class="container">
+        {{ lesson.course }}
+        <br>
+    </div>
+{% endfor %}
+{% endblock %}
+

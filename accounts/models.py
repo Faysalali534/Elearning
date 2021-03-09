@@ -9,7 +9,7 @@ class UserInfoManager(models.Manager):
         return super(UserInfoManager, self).get_queryset().filter(location='liberty gate')
 
     def get_professor(self, prof):
-        return super(UserInfoManager, self).get_queryset().filter(user_name__contains=prof)
+        return super(UserInfoManager, self).get_queryset().filter(username__contains=prof)
 
 
 class UserInfo(models.Model):

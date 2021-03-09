@@ -8,7 +8,7 @@
         <h6 class="card-subtitle mb-2 text-muted">Course ID : {{ course.id }}</h6>
         <p class="card-text">{{ course.description }}</p>
         <a href="{% url 'learning_material:course_detail' course %}" class="card-link">Course Details</a>
-          <a href="{% url 'learning_material:edit_course' course.id %}" class="card-link">Edit Course</a>
+          <a href="{% url 'learning_material:enroll_student' course %}" class="card-link">Enroll Me</a>
       </div>
     </div>
 {% endfor %}
