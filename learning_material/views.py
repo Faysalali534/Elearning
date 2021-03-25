@@ -1,15 +1,20 @@
-from django.contrib.auth.mixins import PermissionRequiredMixin
-from django.contrib.auth.views import redirect_to_login
+import json
+from django.urls import reverse
+from django.contrib import messages
 from django.db.models import Q
 from django.http import HttpResponse
-from django.shortcuts import render, redirect
-from django.utils.decorators import method_decorator
 from django.views.generic.list import ListView
 from django.views.generic.edit import UpdateView
-from django.views.generic.base import TemplateView
+from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
-from .form import AddLessonForm, AddCourseForm, EditCourseForm, EditLessonForm
-from .models import Course, Lesson, EnrollStudent
+from django.contrib.auth.views import redirect_to_login
+from django.contrib.auth.mixins import PermissionRequiredMixin
+from django.views.generic.base import TemplateView, View
+from django.shortcuts import render, redirect, get_object_or_404
+
+
+from learning_material.form import AddLessonForm, AddCourseForm, EditCourseForm, EditLessonForm, SearchCourseForm
+from learning_material.models import Course, Lesson, EnrollStudent
 
 
 def group_required(group):
@@ -18,7 +23,7 @@ def group_required(group):
             if request.user.groups.filter(name=group).exists():
                 return view_func(request, *args, **kwargs)
             else:
-                return HttpResponse("You are not autherized to access this page.")
+                return HttpResponse("You are not authorized to access this page.")
 
         return wrapper_func
 
@@ -27,15 +32,30 @@ def group_required(group):
 
 def course_detail(request, course):
     if request.user.is_authenticated:
-        # lessons = Lesson.objects.filter(course=id).all()
-        print('Course detail :', type(course))
         return render(request, 'learning_material/course_detail.html', {'course': course})
 
 
 def all_courses_detail(request):
     if request.user.is_authenticated:
-        courses = Course.objects.all()
+        courses = EnrollStudent.objects.filter(student_id=request.user.id).values('course_id_id')
+        id_list = []
+        for course in courses:
+            id_list.append(course['course_id_id'])
+        courses = Course.objects.exclude(id__in=id_list)
         return render(request, 'learning_material/all_courses_detail.html', {'courses': courses})
+
+
+class EnrollCoursesList(ListView):
+    template_name = 'learning_material/enroll_course_list.html'
+    context_object_name = 'courses'
+
+    def get_queryset(self):
+        courses = EnrollStudent.objects.filter(student_id=self.kwargs.get('id')).values('course_id_id')
+        id_list = []
+        for course in courses:
+            id_list.append(course['course_id_id'])
+        queryset = Course.objects.filter(id__in=id_list).all()
+        return queryset
 
 
 class UserAccessMixin(PermissionRequiredMixin):
@@ -86,9 +106,20 @@ class LessonEditView(UserAccessMixin, UpdateView):
 
 # Create your views here.
 @method_decorator(login_required, name='dispatch')
-class CourseListView(ListView):
+class CourseListView(TemplateView):
     template_name = 'learning_material/course_list_view.html'
-    context_object_name = 'courses'
+
+    def get(self, request):
+        courses = Course.objects.filter(taught_by=self.request.user.id)
+        form = SearchCourseForm()
+        return render(request, self.template_name, {'courses': courses, 'form': form})
+
+    def post(self, request, **kwargs):
+        form = SearchCourseForm(self.request.POST)
+        if form.is_valid():
+            text = form.cleaned_data['name']
+            courses = Course.objects.filter(taught_by=self.request.user.id).filter(name=text)
+            return render(request, self.template_name, {'courses': courses, 'form': form})
 
     def get_queryset(self):
         queryset = Course.objects.filter(taught_by=self.request.user.id)
@@ -126,6 +157,7 @@ def add_lesson(request, course):
             lesson.created_by = request.user
             lesson.course = Course.objects.filter(name__exact=course).get()
             lesson.save()
+            messages.success(request, 'Lesson Added Successfully.')
             return redirect('/learning_material')
         else:
             print(lesson_form.errors)
@@ -134,7 +166,8 @@ def add_lesson(request, course):
 
     return render(request, 'learning_material/add_lesson.html',
                   {'registered': registered,
-                   'lesson_form': lesson_form})
+                   'lesson_form': lesson_form,
+                   'messages': messages})
 
 
 class CourseView(TemplateView):
@@ -153,7 +186,7 @@ def professor_dashboard(request):
     for course in courses:
         enroll = EnrollStudent.objects.filter(course_id=course)
         enroll_students_list.append(enroll)
-    return render(request, 'learning_material/base.html',
+    return render(request, 'base.html',
                   context={'enroll_students_list': enroll_students_list})
 
 
@@ -174,16 +207,78 @@ class EnrollStudentsView(TemplateView):
 class CourseLessonView(TemplateView):
     template_name = "learning_material/course_lessons.html"
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+    def get(self, request, name):
         course_id = Course.objects.get(name=self.kwargs.get('name'))
-        context['lessons'] = Lesson.objects.filter(course_id=course_id)
-        context['course'] = self.kwargs.get('name')
-        return context
+        lessons = Lesson.objects.filter(course_id=course_id)
+        form = SearchCourseForm()
+        return render(request, self.template_name, {'course': course_id, 'lessons': lessons, 'form': form})
+
+    def post(self, request, **kwargs):
+        form = SearchCourseForm(self.request.POST)
+        if form.is_valid():
+            text = form.cleaned_data['name']
+            course_id = Course.objects.get(name=self.kwargs.get('name'))
+            lessons = Lesson.objects.filter(course_id=course_id).filter(name=text)
+            form = SearchCourseForm()
+            return render(request, self.template_name, {'course': course_id, 'lessons': lessons, 'form': form})
 
 
-class ThanksTemplateView(TemplateView):
-    template_name = 'learning_material/thanks.html'
+def search(request):
+    search_form = SearchCourseForm
+    return render(request, 'learning_material/search_courses.html',
+                  {'search_form': search_form})
+
+
+class CourseSearchView(TemplateView):
+    template_name = 'learning_material/search_courses.html'
+
+    def get(self, request):
+        form = SearchCourseForm()
+        courses = Course.objects.all()
+        return render(request, self.template_name, {'courses': courses, 'form': form})
+
+    def post(self, request):
+        form = SearchCourseForm(request.POST)
+        if form.is_valid():
+            text = form.cleaned_data['name']
+            courses = Course.objects.filter(name=text)
+            if not courses:
+                form = SearchCourseForm()
+                courses = None
+                return render(request, self.template_name, {'courses': courses, 'form': form})
+            else:
+                args = {'courses': courses, 'form': form}
+                return render(request, self.template_name, args)
+        else:
+            form = SearchCourseForm()
+            courses = None
+            return render(request, self.template_name, {'courses': courses, 'form': form})
+
+
+class CourseDeleteView(View):
+    template_name = 'learning_material/delete_course.html'
+
+    def get(self, request, name):
+        course = get_object_or_404(Course, name__iexact=name)
+        return render(request, self.template_name, {'course': course})
+
+    def post(self, request, name):
+        course = get_object_or_404(Course, name__iexact=name)
+        course.delete()
+        return redirect(reverse('learning_material:course_list'))
+
+
+class LessonDeleteView(View):
+    template_name = 'learning_material/delete_lesson.html'
+
+    def get(self, request, name, id):
+        lesson = get_object_or_404(Lesson, id=id)
+        return render(self.request, self.template_name, {'lesson': lesson})
+
+    def post(self, request, name, id):
+        lesson = get_object_or_404(Lesson, id=id)
+        lesson.delete()
+        return redirect(reverse('learning_material:course_lesson_view', args=(name,)))
 
 
 def enroll_student(request, name):
@@ -193,3 +288,23 @@ def enroll_student(request, name):
         if created:
             enroll.save()
         return render(request, 'learning_material/enroll_students_view.html', {})
+
+
+def session_expiry(request):
+    request.session.set_expiry(30)
+    return render(request, 'learning_material/take_quiz.html')
+
+
+def take_quiz(request):
+    session_expiry(request)
+    return render(request, 'learning_material/thanks.html')
+
+
+class InfoListView(ListView):
+    model = Course
+    template_name = 'learning_material/search_course.html'
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['qs_json'] = json.dumps(list(Course.objects.values()))
+        return context

@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='UserInfo',
             fields=[
-                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, primary_key=True, serialize=False, to=settings.AUTH_USER_MODEL)),
+                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, serialize=False, to=settings.AUTH_USER_MODEL)),
                 ('phone_number', models.CharField(max_length=30)),
                 ('location', models.CharField(max_length=30)),
                 ('user_type', models.CharField(choices=[('student', 'student'), ('professor', 'professor')], default='student', max_length=9)),

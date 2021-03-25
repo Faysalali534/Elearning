@@ -1,6 +1,5 @@
-from django.conf.urls import url
 from django.urls import path
-from .import views
+from accounts import views
 
 app_name = 'accounts'
 urlpatterns = [
@@ -8,6 +7,10 @@ urlpatterns = [
      path('accounts/register/', views.register, name='register'),
      path('accounts/login/', views.login_request, name='login_request'),
      path('accounts/logout/', views.logout_view, name='logout'),
-     url(r"^accounts/profile/$", views.view_profile, name='view_profile'),
-     url(r"^accounts/edit/$", views.edit_profile, name='edit_profile'),
+     path("accounts/profile/", views.profile_view, name='profile_view'),
+     path("accounts/edit/", views.edit_profile, name='edit_profile'),
+
+     path("set/", views.set_session, name='set_session'),
+     path("get/", views.get_session, name='get_session'),
+     path("del/", views.del_session, name='del_session'),
 ]

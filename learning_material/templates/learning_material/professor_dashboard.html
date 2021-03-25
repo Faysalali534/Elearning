@@ -12,7 +12,7 @@
                     <a class="btn btn-outline-primary mt-3" href="{% url 'accounts:view_profile' %}" role="button">Profile</a>
                     <a class="btn btn-outline-primary mt-3" href="{% url 'learning_material:course_list' %}" role="button">Courses</a>
                     <a class="btn btn-outline-primary mt-3" href="{% url 'learning_material:add_course' %}" role="button">Add Course</a>
-                    <a class="btn btn-outline-primary mt-3" href="{% url 'learning_material:add_lesson' %}" role="button">Add Lesson</a>
+                    <a class="btn btn-outline-primary mt-3" href="{% url 'learning_material:add_lesson' course %}" role="button">Add Lesson</a>
                     <a class="btn btn-outline-primary mt-3" href="{% url 'accounts:edit_profile' %}" role="button">Edit Profile</a>
                 {% endif %}
             </div>

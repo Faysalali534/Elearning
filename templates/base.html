@@ -2,6 +2,7 @@
 {% load auth_extras %}
 <html lang="en">
 <head>
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
@@ -21,7 +22,7 @@
                 <a class="nav-link active" aria-current="page" href="{% url 'accounts:index' %}">Home</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link active" aria-current="page" href="{% url 'accounts:view_profile' %}">Profile</a>
+              <a class="nav-link active" aria-current="page" href="{% url 'accounts:profile_view' %}">Profile</a>
             </li>
             <li class="nav-item">
               <a class="nav-link active" aria-current="page" href="{% url 'accounts:edit_profile' %}">Edit Profile</a>
@@ -52,19 +53,21 @@
                 <div class="col-2 border pt-3">
                     <div class="d-flex flex-column bd-highlight mb-3">
                         {% if request.user|has_group:"professor" %}
-                            <a class="btn btn-outline-primary mt-3" href="{% url 'accounts:view_profile' %}" role="button">Profile</a>
-                            <a class="btn btn-outline-primary mt-3" href="{% url 'learning_material:course_list' %}" role="button">Courses</a>
-                            <a class="btn btn-outline-primary mt-3" href="{% url 'learning_material:add_course' %}" role="button">Add Course</a>
-                            <a class="btn btn-outline-primary mt-3" href="{% url 'learning_material:course_list' %}" role="button">Add Lesson</a>
-                            <a class="btn btn-outline-primary mt-3" href="{% url 'accounts:edit_profile' %}" role="button">Edit Profile</a>
+                            <a class="btn btn-outline-primary .text-white mt-3" href="{% url 'accounts:profile_view' %}" role="button">Profile</a>
+                            <a class="btn btn-outline-primary .text-white mt-3" href="{% url 'learning_material:course_list' %}" role="button">Courses</a>
+                            <a class="btn btn-outline-primary .text-white mt-3" href="{% url 'learning_material:add_course' %}" role="button">Add Course</a>
+                            <a class="btn btn-outline-primary .text-white mt-3" href="{% url 'learning_material:course_list' %}" role="button">Add Lesson</a>
+                            <a class="btn btn-outline-primary .text-white mt-3" href="{% url 'accounts:edit_profile' %}" role="button">Edit Profile</a>
                         {% elif request.user|has_group:"student"%}
                             <h1>Profile</h1>
-                            <a class="btn btn-outline-primary mt-3" href="{% url 'accounts:view_profile' %}" role="button">Profile</a>
+                            <a class="btn btn-outline-primary mt-3" href="{% url 'accounts:profile_view' %}" role="button">Profile</a>
                             <a class="btn btn-outline-primary mt-3" href="{% url 'accounts:edit_profile' %}" role="button">Edit Profile</a>
                             <br>
                             <h1>Curriculum</h1>
-                            <a class="btn btn-outline-primary mt-3" href="{% url 'learning_material:all_courses_detail' %}" role="button">My Courses</a>
+                            <a class="btn btn-outline-primary mt-3" href="{% url 'learning_material:start_searching_course' %}" role="button">Search Courses</a>
+                            <a class="btn btn-outline-primary mt-3" href="{% url 'learning_material:enroll_course_list' request.user.id %}" role="button">My Courses</a>
                             <a class="btn btn-outline-primary mt-3" href="{% url 'learning_material:all_courses_detail' %}" role="button">Offered Courses</a>
+                            <a class="btn btn-outline-primary mt-3" href="{% url 'learning_material:take_quiz' %}" role="button">Take Quiz</a>
                         {% endif %}
                     </div>
                 </div>
@@ -78,6 +81,9 @@
         {% block content %}
         {% endblock %}
     {% endif %}
+
+    {% block scripts %}
+    {% endblock scripts %}
 
 </body>
 <script

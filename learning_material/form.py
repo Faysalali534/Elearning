@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserChangeForm
 
-from .models import Lesson, Course
+from learning_material.models import Lesson, Course
 
 
 class AddCourseForm(forms.ModelForm):
@@ -54,3 +54,8 @@ class EditLessonForm(UserChangeForm):
             'created_at',
             'course'
         ]
+
+
+class SearchCourseForm(forms.Form):
+    name = forms.CharField(label='Search')
+    fields = ['name']

@@ -1,7 +1,7 @@
 from django.db import models
+from django.utils import timezone
 from django.contrib.auth.models import User
-from django.db.models.signals import post_save
-from django.dispatch import receiver
+from accounts.signals import set_username
 
 
 class UserInfoManager(models.Manager):
@@ -12,8 +12,8 @@ class UserInfoManager(models.Manager):
         return super(UserInfoManager, self).get_queryset().filter(username__contains=prof)
 
 
-class UserInfo(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile', primary_key=True)
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     phone_number = models.CharField(max_length=30)
     location = models.CharField(max_length=30)
     student = 'student'
@@ -31,25 +31,62 @@ class UserInfo(models.Model):
         return self.user.username
 
 
-def set_username(sender, instance, **kwargs):
-    print(sender)
-    print(kwargs)
-    if not instance.username:
-        username = instance.first_name
-        counter = 1
-        while User.objects.filter(username=username):
-            username = instance.first_name + str(counter)
-            counter += 1
-        instance.username = username
-
-
 models.signals.pre_save.connect(set_username, sender=User)
 
 
-@receiver(post_save, sender=User)
-def create_user_profile(sender, instance, created, **kwargs):
-    if created:
-        UserInfo.objects.create(user=instance)
-        print(sender)
-        print(kwargs)
-        print("Post save working")
+class Test(models.Model):
+    my_time = models.DateTimeField(default=timezone.now)
+
+
+class GenQuerySet:
+    start = 1
+    p = 0
+    offset = 0
+    chunk = 10
+    convert = ''
+    __instance__ = None
+
+    @staticmethod
+    def getInstance():
+        if GenQuerySet.__instance__ is None:
+            GenQuerySet()
+        return GenQuerySet.__instance__
+
+    def __init__(self):
+        if GenQuerySet.__instance__:
+            raise Exception('Singleton')
+        else:
+            GenQuerySet.__instance__ = self
+
+    @classmethod
+    def gen_queryset(cls, queryset, chunk=10):
+        if cls.p == 100:
+            cls.start += 1
+            cls.p = 0
+
+        if cls.start % 2 == 1:
+            cls.convert = 'pst'
+        else:
+            cls.convert = 'utc'
+        print(cls.p, ' ', cls.p + chunk)
+        while True:
+            items = queryset.all().values('pk')[cls.p:cls.p+chunk]
+            print(items)
+            if not items:
+                break
+            cls.p += chunk
+            return cls.convert, items
+
+
+def ordered_results():
+    test = Test.objects.all().order_by('id')
+    return test
+
+
+def get():
+    test = ordered_results()
+    g = GenQuerySet.getInstance()
+    conversion, item = g.gen_queryset(test)
+    print('Converting in ', conversion)
+    # for user in item:
+    return conversion, item

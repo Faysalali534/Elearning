@@ -1,7 +1,6 @@
 import os
-
+from decouple import config
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-from os.path import normpath, join
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 TEMPLATE_DIR = os.path.join(BASE_DIR, 'templates')
@@ -12,9 +11,9 @@ TEMPLATE_DIR = os.path.join(BASE_DIR, 'templates')
 
 # SECURITY WARNING: keep the secret key used in production secret!
 # SECRET_KEY = '62mne3w7&!4kx$uhc-b09rsdvlj#elkng^6klvy*=hza7j=1rr'
-SECRET_KEY = os.environ['SECRET_KEY']
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+SECRET_KEY = config('SECRET_KEY')
+
 ALLOWED_HOSTS = []
 
 
@@ -23,6 +22,7 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = [
     'accounts.apps.AccountsConfig',
     'learning_material.apps.LearningMaterialConfig',
+    'restapi.apps.RestapiConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -31,7 +31,12 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'widget_tweaks',
     'debug_toolbar',
+    'rest_framework',
+    'crontab',
+    'django_celery_results',
+    'django_celery_beat',
 ]
+
 
 # AUTH_USER_MODEL = 'accounts.UserInfo'
 
@@ -44,7 +49,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'demo_register.middleware.LoginRequiredMiddleware',
-    'demo_register.middleware.ExceptionMiddleware',
+    # 'demo_register.middleware.ExceptionMiddleware',
     # 'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
@@ -113,8 +118,16 @@ LOGIN_URL = '/accounts/login/'
 LOGIN_EXEMPT_URLS = (
     r'^accounts/logout/$',
     r'^accounts/register/$',
+    r'^restapi/profile_create/$',
+    r'^restapi/profile_get/$',
+    r'^restapi/update_user/$',
+    r'^restapi/delete_user/$',
+    r'^restapi/user_profile_api/$',
+    r'^restapi/UserAPI/$',
 )
 
 INTERNAL_IPS = [
     '127.0.0.1',
 ]
+
+

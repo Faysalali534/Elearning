@@ -1,9 +1,10 @@
-from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django import forms
+from django.forms import ModelForm
 from django.contrib.auth.models import User
-from django.core.exceptions import ValidationError
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 
-from .models import UserInfo
+from accounts.models import UserProfile
+from accounts.validator import *
 
 
 def validate_geeks_mail(value):
@@ -45,7 +46,7 @@ class UserForm(UserCreationForm):
         return user
 
 
-class UserInfoForm(forms.ModelForm):
+class UserProfileForm(forms.ModelForm):
     phone_number = forms.CharField(required=False)
     location = forms.CharField(required=False)
     user_types = [
@@ -55,7 +56,7 @@ class UserInfoForm(forms.ModelForm):
     user_type = forms.ChoiceField(required=True, choices=user_types)
 
     class Meta:
-        model = UserInfo
+        model = UserProfile
         fields = ('phone_number', 'location', 'user_type')
 
 
@@ -63,7 +64,7 @@ class UserInfoFormNew(forms.ModelForm):
     course_name = forms.CharField(required=True)
 
     class Meta:
-        model = UserInfo
+        model = UserProfile
         fields = ('course_name',)
 
 
@@ -71,6 +72,7 @@ class EditAccountForm(UserChangeForm):
     first_name = forms.CharField(required=True)
     last_name = forms.CharField(required=True)
     email = forms.CharField(required=True, validators=['validate_geeks_mail'])
+
     password = None
 
     class Meta:
@@ -82,3 +84,15 @@ class EditAccountForm(UserChangeForm):
             'email',
         ]
         labels = {'email': 'Email'}
+
+
+class EditUserInfoForm(ModelForm):
+    phone_number = forms.CharField(required=True)
+    location = forms.CharField(required=True)
+
+    class Meta:
+        model = UserProfile
+        fields = [
+            'phone_number',
+            'location',
+        ]

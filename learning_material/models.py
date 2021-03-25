@@ -34,17 +34,16 @@ class EnrollStudent(models.Model):
     id = models.AutoField(primary_key=True)
     student_id = models.ForeignKey('auth.User', limit_choices_to={'groups__name': 'student'}
                                    , on_delete=models.CASCADE)
-    course_id = models.ForeignKey(Course, on_delete=models.DO_NOTHING)
+    course_id = models.ForeignKey(Course, on_delete=models.CASCADE)
     enrolled_at = models.DateTimeField(default=now, blank=True)
 
     def __str__(self):
         return self.student_id.username
 
 
-def set_course_taught_by(sender, instance, user, **kwargs):
+def set_course_taught_by(sender, instance, **kwargs):
     print(sender)
     print(kwargs)
-    print('reciver :', user.username)
     if not instance.taught_by:
         username = instance.first_name
         counter = 1

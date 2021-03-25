@@ -6,7 +6,6 @@
 	<div class="card text-white bg-dark" style="width: 18rem;">
 	  <div class="card-body">
 		<h5 class="card-title">Enrolled Students</h5>
-	<!--    <h6 class="card-subtitle mb-2 text-muted">Course ID : {{ course.id }}</h6>-->
 		<p class="card-text">You can view all students details enrolled in this course</p>
 		<a href="{% url 'learning_material:enroll_students_view' course %}" class="card-link text-white">Students</a>
 	  </div>
@@ -16,7 +15,6 @@
 	<div class="card text-white bg-dark" style="width: 18rem;">
 	  <div class="card-body">
 		<h5 class="card-title">Course Lessons</h5>
-	<!--    <h6 class="card-subtitle mb-2 text-muted">Course ID : {{ course.id }}</h6>-->
 		<p class="card-text">You can view and edit all lessons of this course</p>
 		<a href="{% url 'learning_material:course_lesson_view' course %}" class="card-link text-white">Lessons</a>
 	  </div>

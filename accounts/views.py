@@ -1,12 +1,12 @@
-from django.contrib.auth import login, logout, authenticate
-from django.contrib.auth.models import Group
-from django.shortcuts import render
+from django.http import HttpResponse
+from django.shortcuts import render, redirect
 from django.contrib import messages
-from .form import UserForm, UserInfoForm, EditAccountForm
+from django.contrib.auth.models import Group
 from django.contrib.auth.forms import AuthenticationForm
-from django.core.signals import request_finished
-from django.dispatch import receiver
-from .decorators import *
+from django.contrib.auth import login, logout, authenticate
+
+from accounts.form import UserForm, UserProfileForm, EditAccountForm, EditUserInfoForm
+from accounts.decorators import anonymous_user
 
 
 def logout_view(request):
@@ -23,7 +23,7 @@ def register(request):
 
     if request.method == "POST":
         user_form = UserForm(data=request.POST)
-        profile_form = UserInfoForm(data=request.POST)
+        profile_form = UserProfileForm(data=request.POST)
 
         if user_form.is_valid() and profile_form.is_valid():
             user = user_form.save()
@@ -42,7 +42,7 @@ def register(request):
             print(user_form.errors, profile_form.errors)
     else:
         user_form = UserForm
-        profile_form = UserInfoForm
+        profile_form = UserProfileForm
 
     return render(request, 'accounts/register.html',
                   {'registered': registered,
@@ -67,14 +67,9 @@ def login_request(request):
     return render(request, 'accounts/login.html', context={'form': AuthenticationForm()})
 
 
-@receiver(request_finished)
-def my_callback(sender, **kwargs):
-    print(sender, ' ', kwargs)
-    print('Request Finished')
-
-
 @anonymous_user
-def view_profile(request):
+def profile_view(request):
+    session_visits_limit(request)
     context = {'name': request.user.username}
     return render(request, 'accounts/profile.html', context)
 
@@ -83,10 +78,40 @@ def view_profile(request):
 def edit_profile(request):
     if request.method == 'POST':
         form = EditAccountForm(request.POST, instance=request.user)
+        userinfo_form = EditUserInfoForm(request.POST, instance=request.user)
         if form.is_valid():
-            form.save()
-            return redirect('view_profile')
+            user_form = form.save()
+            custom_form = userinfo_form.save(False)
+            custom_form.user = user_form
+            custom_form.save()
+            return redirect('profile_view')
     else:
         form = EditAccountForm(instance=request.user)
-        context = {'form': form}
+        custom_form = EditUserInfoForm(instance=request.user)
+        context = {'form': form, 'custom_form': custom_form}
         return render(request, 'accounts/edit_profile.html', context)
+
+
+def set_session(request):
+    request.session['notification'] = 'Test'
+    return render(request, 'learning_material/setsession.html')
+
+
+def get_session(request):
+    test = request.session.get('notification')
+    return render(request, 'learning_material/getsession.html', {'test': test})
+
+
+def del_session(request):
+    if 'notification' in request.session:
+        del request.session['notification']
+    return render(request, 'learning_material/delsession.html')
+
+
+def session_visits_limit(request):
+    num_visits = request.session.get('num_visits', 0) + 1
+    request.session['num_visits'] = num_visits
+    if num_visits > 4:
+        del (request.session['num_visits'])
+        request.session.flush()
+    return HttpResponse('view count=' + str(num_visits))
