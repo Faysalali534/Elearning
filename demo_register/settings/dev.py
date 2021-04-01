@@ -35,3 +35,9 @@ BROKER_URL = 'amqp://guest:guest@localhost:5672/'
 CELERY_RESULT_BACKEND = 'django-db'
 
 CELERY_CACHE_BACKEND = 'django-cache'
+
+# REST_FRAMEWORK = {
+#     'DEFAULT_AUTHENTICATION_CLASSES': ['rest_framework.authentication.BasicAuthentication'],
+#     'DEFAULT_PERMISSION_CLASSES': ['rest_framework.permissions.IsAuthenticated']
+# }
+

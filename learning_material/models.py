@@ -13,15 +13,19 @@ class Course(models.Model):
     def __str__(self):
         return self.name
 
+    @property
+    def lessons(self):
+        return self.lesson_set.all()
+
 
 class Lesson(models.Model):
-    lesson_id = models.CharField(max_length=100, unique=True)
+    lesson_id = models.CharField(max_length=100)
     name = models.CharField(max_length=100)
     created_by = models.ForeignKey("auth.User", limit_choices_to={'groups__name': "professor"},
                                    on_delete=models.CASCADE,
                                    related_name='createdBy', null=True, blank=True)
     created_at = models.DateTimeField(default=now, blank=True)
-    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='lessons')
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
 
     class Meta:
         ordering = ['lesson_id']

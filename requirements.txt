@@ -8,6 +8,9 @@ psycopg2==2.8.6
 django-widget-tweaks==1.4.8
 python-decouple==3.4
 django-debug-toolbar==3.2
-djangorestframework~=3.12.2
-tzlocal~=2.1
-requests~=2.25.1
+djangorestframework==3.12.2
+djangorestframework-simplejwt==4.6.0
+tzlocal==2.1
+requests==2.25.1
+django-rest-swagger==2.2.0
+httpie==2.4.0

@@ -35,9 +35,11 @@ INSTALLED_APPS = [
     'crontab',
     'django_celery_results',
     'django_celery_beat',
+    'rest_framework.authtoken',
+    'rest_framework_swagger',
 ]
 
-
+REST_FRAMEWORK = { 'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema' }
 # AUTH_USER_MODEL = 'accounts.UserInfo'
 
 MIDDLEWARE = [
@@ -124,6 +126,10 @@ LOGIN_EXEMPT_URLS = (
     r'^restapi/delete_user/$',
     r'^restapi/user_profile_api/$',
     r'^restapi/UserAPI/$',
+    r'^gettoken/$',
+    r'^verify_token/$',
+    r'^refresh_token/$',
+    r'^learning_material_api/course_info_api/$',
 )
 
 INTERNAL_IPS = [
