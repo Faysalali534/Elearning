@@ -1,3 +1,4 @@
+from django.utils.functional import cached_property
 from django.utils.timezone import now
 from django.contrib.auth.models import User
 from django.db import models

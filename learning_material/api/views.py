@@ -7,8 +7,17 @@ from rest_framework.response import Response
 from learning_material.api.serializers import CourseLessonSerializer, LessonSerializer, CourseInfoSerializer, \
     LessonInfoSerializer, EnrollStudentSerializer, EnrollUserSerializer
 from learning_material.models import Course, Lesson, EnrollStudent
-from restapi.permission import MyPermission
+from restapi.permission import GroupCheckPermission
 from rest_framework_simplejwt.authentication import JWTAuthentication
+
+'''
+    This api will have following functionalities
+    - Shall be able list all courses with their lessons
+    - Shall Add new courses and lessons 
+    - Shall be able to delete courses and lessons 
+    - Shall be able to update courses and lessons
+    - Shall require JWT authentication to access api
+'''
 
 
 class CourseLessonApiViewSet(viewsets.ModelViewSet):
@@ -16,7 +25,7 @@ class CourseLessonApiViewSet(viewsets.ModelViewSet):
     queryset = Course.objects.all()
     lookup_field = 'id'
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated, MyPermission]
+    permission_classes = [IsAuthenticated, GroupCheckPermission]
 
     @action(detail=True, methods=['GET'])
     def lessons(self, request, id=None):
@@ -37,10 +46,20 @@ class CourseLessonApiViewSet(viewsets.ModelViewSet):
         return Response(serializer.errors, status=400)
 
 
+'''
+    This api will have following functionalities
+    - Shall list all courses
+    - Shall Add new courses
+    - Shall be able to delete courses
+    - Shall be able to update courses
+    - Requires JWT authentication to access api
+'''
+
+
 class CourseInfoViewSet(viewsets.ModelViewSet):
     serializer_class = CourseInfoSerializer
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated, MyPermission]
+    permission_classes = [IsAuthenticated, GroupCheckPermission]
 
     def get_queryset(self):
         if self.request.user.is_anonymous:
@@ -58,14 +77,31 @@ class CourseInfoViewSet(viewsets.ModelViewSet):
         serializer.save(taught_by=self.request.user)
 
 
+'''
+    This api will have following functionalities
+    - Shall list all lessons
+    - Shall Add new lessons
+    - Shall be able to delete lessons
+    - Shall be able to update lessons
+    - Requires JWT authentication to access api
+'''
+
+
 class LessonViewSet(viewsets.ModelViewSet):
     serializer_class = LessonSerializer
     queryset = Lesson.objects.all()
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated, MyPermission]
+    permission_classes = [IsAuthenticated, GroupCheckPermission]
 
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)
+
+
+'''
+    This api will have following functionalities
+    - Shall be able to enroll student in the course
+    - Shall be able to check if the student is already enrolled in the course
+'''
 
 
 class EnrollStudentViewSet(viewsets.ModelViewSet):
@@ -87,6 +123,13 @@ class EnrollStudentViewSet(viewsets.ModelViewSet):
         return Response({'msg': 'Student already enrolled'})
 
 
+'''
+    This api will have following functionalities
+    - Shall be able to display all the students enrolled in the course
+    - Requires JWT authentication to access api
+'''
+
+
 class EnrollUserViewSet(viewsets.ModelViewSet):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
@@ -95,7 +138,6 @@ class EnrollUserViewSet(viewsets.ModelViewSet):
         return EnrollStudent.objects.filter(course_id=self.kwargs.get('pk')).all()
 
     def get_serializer_class(self):
-        print(self.action)
         if self.action in ['retrieve', 'list']:
             return EnrollUserSerializer
         else:
@@ -105,16 +147,16 @@ class EnrollUserViewSet(viewsets.ModelViewSet):
     def enrolledstudents(self, request, pk=None):
         id = pk
         enroll_student = EnrollStudent.objects.filter(course_id=id).all()
-        python_data = []
+        students = []
         for student in enroll_student:
-            dict = {}
-            dict['id'] = student.id
-            dict['first_name'] = student.student_id.first_name
-            dict['username'] = student.student_id.username
-            dict['last_name'] = student.student_id.last_name
-            dict['email'] = student.student_id.email
-            dict['enrolled_at'] = student.enrolled_at
-            python_data.append(dict)
-        serializer = EnrollUserSerializer(data=python_data, many=True)
+            student_dict = {}
+            student_dict['id'] = student.id
+            student_dict['first_name'] = student.student_id.first_name
+            student_dict['username'] = student.student_id.username
+            student_dict['last_name'] = student.student_id.last_name
+            student_dict['email'] = student.student_id.email
+            student_dict['enrolled_at'] = student.enrolled_at
+            students.append(student_dict)
+        serializer = EnrollUserSerializer(data=students, many=True)
         if serializer.is_valid():
             return Response(serializer.data, status=200)

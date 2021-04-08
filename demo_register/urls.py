@@ -24,12 +24,18 @@ from rest_framework_swagger.views import get_swagger_view
 schema_view = get_swagger_view(title='E-learning API Documentation')
 
 urlpatterns = [
+    path('admin/', admin.site.urls),
     path('', include('accounts.urls')),
+    path('auth/', include('djoser.urls')),
+    # path('auth/', include('djoser.urls.authtoken')),
+    path('auth/', include('djoser.urls.jwt')),
+    # path('auth/', include('djoser.social.urls')),
+    # path('social_account/', include('allauth.urls')),
     path('api_documentation/', schema_view),
     path('learning_material/', include('learning_material.urls')),
     path('restapi/', include('restapi.urls')),
     path('learning_material_api/', include('learning_material.api.urls')),
-    path('admin/', admin.site.urls),
+
     path('gettoken/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('refresh_token/', TokenRefreshView.as_view(), name='refresh_token'),
     path('verify_token/', TokenVerifyView.as_view(), name='verify_token'),

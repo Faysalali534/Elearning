@@ -4,6 +4,7 @@ from restapi.auth import CustomAuthToken
 from restapi import views
 from rest_framework.routers import DefaultRouter
 
+
 app_name = 'restapi'
 router = DefaultRouter()
 
@@ -13,7 +14,9 @@ router.register('userapi', views.UserModelViewSet, basename='user')
 
 urlpatterns = [
      path('', include(router.urls)),
+     # path('google/', views.GoogleSocialAuthView.as_view()),
      path('gettoken/', CustomAuthToken.as_view()),
+     path('login_api_view/', views.LoginApiView.as_view(), name='login_api_view'),
      path("user_profile_result/", views.user_profile_result, name='user_profile_result'),
      path("profile_create/", views.create_user_profile, name='profile_create'),
      path("profile_get/<int:pk>/", views.get_user_profile, name='profile_get'),

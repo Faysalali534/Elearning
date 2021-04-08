@@ -1,18 +1,19 @@
+from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
-from rest_framework import serializers
+from rest_framework import serializers, generics
+from rest_framework.exceptions import AuthenticationFailed
 
 from accounts.models import UserProfile
+from djoser.serializers import UserCreateSerializer
 from learning_material.models import Lesson, Course, EnrollStudent
 from restapi.models import Blog
+from restapi.google import Google, register_social_user
 
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['first_name', 'username', 'email', 'last_name']
-
-    # def create(self, validated_data):
-    #     return User.objects.create_user(validated_data['username'], validated_data['email'], validated_data['password'])
+        fields = ['first_name', 'username', 'email', 'last_name', 'password']
 
 
 class BlogSerializer(serializers.Serializer):
@@ -46,136 +47,60 @@ class UserProfileSerializer(serializers.ModelSerializer):
         return profile
 
     def update(self, instance, validated_data):
-        # instance.user = validated_data.get('user', instance.user)
+        user_data = validated_data.get('user', instance.user)
+        User.objects.filter(username__exact=instance).update(
+            username=user_data['username'],
+            first_name=user_data['first_name'],
+            email=user_data['email'],
+            last_name=user_data['last_name'],
+            password=user_data['password']
+        )
         instance.phone_number = validated_data.get('phone_number', instance.phone_number)
         instance.location = validated_data.get('location', instance.location)
         instance.user_type = validated_data.get('user_type', instance.user_type)
         instance.save()
         return instance
 
+    def put(self, instance, validated_data):
+        user_data = validated_data.get('user', instance.user)
+        return instance
 
-# class LessonSerializer(serializers.ModelSerializer):
-#     id = serializers.IntegerField(required=False)
-#
-#     class Meta:
-#         model = Lesson
-#         fields = [
-#             'id',
-#             'lesson_id',
-#             'name',
-#             'created_by',
-#             'created_at',
-#             'course'
-#         ]
-#         read_only_fields = ('course',)
-#
-#
-# class CourseSerializer(serializers.ModelSerializer):
-#     lessons = LessonSerializer(many=True)
-#
-#     class Meta:
-#         model = Course
-#         fields = [
-#             'id',
-#             'course_id',
-#             'name',
-#             'description',
-#             'taught_by',
-#             'lessons'
-#         ]
-#
-#     def create(self, validated_data):
-#         lessons = validated_data.pop('lessons')
-#         course = Course.objects.create(**validated_data)
-#         for lesson in lessons:
-#             Lesson.objects.create(**lesson, course=course)
-#         return course
-#
-#     def update(self, instance, validated_data):
-#         lessons = validated_data.pop('lessons')
-#         instance.course_id = validated_data.get('course_id', instance.course_id)
-#         instance.name = validated_data.get('name', instance.name)
-#         instance.description = validated_data.get('description', instance.description)
-#         instance.taught_by = validated_data.get('taught_by', instance.taught_by)
-#         keep_choice = []
-#         # existing_ids = [lesson.id for lesson in instance.lessons]
-#         for lesson in lessons:
-#             if 'id' in lesson.keys():
-#                 if Lesson.objects.filter(id=lesson['id']).exists():
-#                     l = Lesson.objects.get(id=lesson['id'])
-#                     l.name = lesson.get('name', l.name)
-#                     l.created_by = lesson.get('created_by', l.created_by)
-#                     l.save()
-#                     keep_choice.append(l.id)
-#                 else:
-#                     continue
-#             else:
-#                 l = Lesson.objects.create(**lesson, course=instance)
-#                 keep_choice.append(l.id)
-#         for lesson in instance.lessons:
-#             if lesson.id not in keep_choice:
-#                 lesson.delete()
-#
-#
-# class CourseInfoSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Course
-#         fields = [
-#             'course_id',
-#             'name',
-#             'description',
-#             'taught_by'
-#         ]
-#
-#
-# class LessonInfoSerializer(serializers.ModelSerializer):
-#     id = serializers.IntegerField(required=False)
-#
-#     class Meta:
-#         model = Lesson
-#         fields = [
-#             'id',
-#             'lesson_id',
-#             'name',
-#             'created_by',
-#             'created_at',
-#             'course'
-#         ]
-#
-#
-# class EnrollStudentSerializer(serializers.ModelSerializer):
-#
-#     class Meta:
-#         model = EnrollStudent
-#         fields = [
-#             'id',
-#             'student_id',
-#             'course_id'
-#         ]
-#
-#
-# # class EnrollUserSerializer(serializers.ModelSerializer):
-# #     enroll_student = EnrollStudentSerializer
-# #
-# #     class Meta:
-# #         model = User
-# #         fields = ['first_name', 'username', 'last_name', 'email', 'enroll_student']
-#
-#
-# class EnrollUserSerializer(serializers.ModelSerializer):
-#     student_id = UserSerializer()
-#
-#     class Meta:
-#         model = EnrollStudent
-#         fields = ['id', 'student_id', 'enrolled_at']
-#
-#
-#
-#
-#
-#     # id = serializers.IntegerField()
-#     # first_name = serializers.CharField(max_length=30)
-#     # username = serializers.CharField(max_length=30)
-#     # last_name = serializers.CharField(max_length=30)
-#     # email = serializers.CharField(max_length=30)
-#     # enrolled_at = serializers.DateTimeField()
+
+class UserCreateSerializer(UserCreateSerializer):
+    class Meta(UserCreateSerializer.Meta):
+        model = User
+        fields = ('email', 'username', 'password', 'first_name', 'last_name')
+
+
+class LoginApiSerializer(serializers.Serializer):
+    username = serializers.CharField(max_length=30)
+    password = serializers.CharField(max_length=30)
+
+    def validate(self, data):
+        user = authenticate(**data)
+        if user and user.is_active:
+            return user
+        raise serializers.ValidationError('Incorrect Credentials!')
+
+class GoogleSocialAuthSerializer(serializers.Serializer):
+    auth_token = serializers.CharField()
+
+    def validate_auth_token(self, auth_token):
+        user_data = Google.validate(auth_token)
+        try:
+            user_data['sub']
+        except:
+            raise serializers.ValidationError(
+                'Token is invalid or expired'
+            )
+        if user_data['aud'] != '993340120000-keb638moekcpkivo0v1h8qhqq3rpifs4.apps.googleusercontent.com':
+            raise AuthenticationFailed('ops, who are you?')
+
+        user_id = user_data['sub']
+        email = user_data['email']
+        name = user_data['name']
+        provider = 'google'
+
+        return register_social_user(
+            provider=provider, user_id=user_id, email=email, name=name
+        )

@@ -1,6 +1,8 @@
 from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import User
+from rest_framework_simplejwt.tokens import RefreshToken
+
 from accounts.signals import set_username
 
 
@@ -12,12 +14,21 @@ class UserInfoManager(models.Manager):
         return super(UserInfoManager, self).get_queryset().filter(username__contains=prof)
 
 
+AUTH_PROVIDERS = {
+    'google': 'google', 'email': 'email'
+}
+
+
 class UserProfile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     phone_number = models.CharField(max_length=30)
     location = models.CharField(max_length=30)
     student = 'student'
     professor = 'professor'
+    # auth_provider = models.CharField(
+    #     max_length=100, blank=True, null=True,
+    #     default=AUTH_PROVIDERS.get('email')
+    # )
     user_types = [
         (student, 'student'),
         (professor, 'professor'),
@@ -29,6 +40,13 @@ class UserProfile(models.Model):
 
     def __str__(self):
         return self.user.username
+
+    # def tokens(self):
+    #     refresh = RefreshToken.for_user(self)
+    #     return {
+    #         'refresh': str(refresh),
+    #         'access': str(refresh.access_token)
+    #     }
 
 
 models.signals.pre_save.connect(set_username, sender=User)
