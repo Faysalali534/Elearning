@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% load widget_tweaks %}
+{% block body %}
+<h1>Dashboard</h1>
+    <h2>Welcome {{ name }}</h2>
+    <section>
+        <div class="container">
+          <div class="row">
+              <div class="card">
+                <div class="card-header text-black">
+                  <h2>Profile</h2>
+                </div>
+                <div class="card-body">
+                          <p> User Name : {{ user.username }}<br> </p>
+                          <p> First Name : {{ user.first_name }}<br> </p>
+                          <p> Last Name : {{ user.last_name }}<br> </p>
+                          <p> Email : {{ user.email }}<br> </p>
+                          <p> Phone Number : {{ user.profile.phone_number }}<br> </p>
+                          <p> Location : {{ user.profile.location }}<br> </p>
+                         <br>
+                 </div>
+                    </div>
+              </div>
+            </div>
+      </section>
+{% endblock %}

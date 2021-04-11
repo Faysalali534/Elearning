@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% load widget_tweaks %}
+
+{% block body %}
+    <section>
+        <div class="container">
+          <div class="row">
+              <div class="card">
+                <div class="card-header text-black">
+                  <h2>Add Course</h2>
+                </div>
+                <div class="card-body">
+                    <form method="POST" novalidate>
+                        {% csrf_token %}
+                         {% for field in course_form.visible_fields %}
+                                   {{ field.label_tag }}
+                                      {% render_field field class="form-control" %}
+                                        {% for error in field.errors %}
+                                          <span style="color:red">{{ error }}</span>
+                                        {% endfor %}
+                             {% endfor %}
+                        <div class="d-grid gap-2">
+                             <br><input type="submit" value="Add Course" class="btn btn-outline-primary">
+                        </div>
+                    </form>
+                 </div>
+                    </div>
+              </div>
+            </div>
+        </div>
+      </section>
+{% endblock %}

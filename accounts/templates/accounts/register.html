@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% load widget_tweaks %}
+
+{% block content %}
+    <section>
+        <div class="container">
+          <div class="row">
+            <div class="col-md-6 mx-auto">
+              <div class="card">
+                <div class="card-header text-black">
+                  <h2>Register</h2>
+                </div>
+                <div class="card-body">
+                    {% if registered %}
+                        <h1>Thank you for registering</h1>
+                    {% else %}
+                        <form action="{% url 'accounts:register' %}" method="POST" novalidate>
+                          {% csrf_token %}
+                            <div class="form-group">
+                             {% for field in user_form.visible_fields %}
+                                   {{ field.label_tag }}
+                                      {% render_field field class="form-control" %}
+                                        {% for error in field.errors %}
+                                          <span style="color:red">{{ error }}</span>
+                                        {% endfor %}
+                             {% endfor %}
+                              {% for field in profile_form.visible_fields %}
+                                   {{ field.label_tag }}
+                                      {% render_field field class="form-control" %}
+                                        {% for error in field.errors %}
+                                          <span style="color:red">{{ error }}</span>
+                                        {% endfor %}
+                             {% endfor %}
+                                <br>
+                                <div class="d-grid gap-2">
+                                 <input type="submit" value="Register" class="btn btn-outline-primary">
+                                    </div>
+                               </div>
+                        </form>
+                    {% endif %}
+                 </div>
+                    </div>
+                </div>
+              </div>
+            </div>
+      </section>
+{% endblock %}
+
+
+
+
+
+
+
+
+
+

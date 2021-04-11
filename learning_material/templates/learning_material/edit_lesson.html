@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% load widget_tweaks %}
+
+{% block body %}
+    <section>
+        <div class="container">
+          <div class="row">
+              <div class="card">
+                <div class="card-header text-black">
+                  <h2>Edit Lesson</h2>
+                </div>
+                <div class="card-body">
+                    <form method="POST" novalidate>
+                      {% csrf_token %}
+                         {% for field in form.visible_fields %}
+                           <div class="form-group">
+                               {{ field.label_tag }}
+                                  {% render_field field class="form-control" %}
+                                    {% for error in field.errors %}
+                                      <span style="color:red">{{ error }}</span>
+                                    {% endfor %}
+                         {% endfor %}
+                               <div class="d-grid gap-2">
+                             <br><input type="submit" value="Edit Lesson" class="btn btn-outline-danger">
+                               </div>
+                           </div>
+                    </form>
+                 </div>
+                    </div>
+              </div>
+            </div>
+      </section>
+{% endblock %}

@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% load widget_tweaks %}
+{% load auth_extras %}
+{% block body %}
+
+<div class="container-fluid">
+    <h1>
+        Search Lesson
+    </h1>
+    <form method="POST">
+        {% csrf_token %}
+        {% for field in form.visible_fields %}
+            {% render_field field class="form-control" %}
+                {% for error in field.errors %}
+                    <span style="color:red">{{ error }}</span>
+                {% endfor %}
+        {% endfor %}
+        <div class="col-md-12 text-center">
+            <button class="btn btn-outline-primary btn-lg" type="submit">Search</button>
+        </div>
+    </form>
+</div>
+<br>
+<div class="row mt-3 pt-3">
+    {% for lesson in lessons %}
+        <div class="col-sm-4">
+            <div class="card text-white bg-dark mb-3" style="width: 18rem;">
+              <div class="card-body">
+                <h5 class="card-title">{{ lesson.name }}</h5>
+                <h6 class="card-subtitle mb-2 text-muted">Lesson ID : {{ lesson.id }}</h6>
+                <p class="card-text">{{ lesson.created_at }}</p>
+                {% if request.user|has_group:"professor" %}
+                <a href="{% url 'learning_material:edit_lesson' lesson.id %}" class="card-link">Lesson Edit</a>
+                  <a href="{% url 'learning_material:delete_lesson' course lesson.id %}" class="card-link">Lesson Delete</a>
+                  {% else %}
+                    <a href="" class="card-link">Read Lesson</a>
+                  {% endif %}
+              </div>
+            </div>
+        </div>
+    {% empty %}
+        <h1>No Lesson with that name exists.</h1>
+
+    {% endfor %}
+
+    <div class="card text-white bg-dark mb-3" style="width: 18rem;">
+      <div class="card-body">
+        <h5 class="card-title">Add New Lesson</h5>
+        <h6 class="card-subtitle mb-2 text-muted">Course : {{ course }}</h6>
+        <p class="card-text">Create Now</p>
+          {% if request.user|has_group:"professor" %}
+        <a href="{% url 'learning_material:add_lesson' course %}" class="card-link">Add Lesson</a>
+          {% else %}
+            <a href="" class="card-link">Read Lesson</a>
+          {% endif %}
+      </div>
+    </div>
+</div>
+{% endblock %}
+

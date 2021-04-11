@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% load widget_tweaks %}
+{% block body %}
+<div class="container-fluid">
+    <h1>
+        Search Course
+    </h1>
+    <form method="POST">
+        {% csrf_token %}
+        {% for field in form.visible_fields %}
+            {% render_field field class="form-control" %}
+                {% for error in field.errors %}
+                    <span style="color:red">{{ error }}</span>
+                {% endfor %}
+        {% endfor %}
+        <div class="col-md-12 text-center">
+            <button class="btn btn-outline-primary btn-lg" type="submit">Search</button>
+        </div>
+    </form>
+</div>
+<br>
+<div class="row mt-3 pt-3">
+    {% for course in courses %}
+        <div class="col-sm-4">
+            <div class="card text-white bg-dark mb-3" style="width: 18rem;">
+              <div class="card-body">
+                <h5 class="card-title">{{ course.name }}</h5>
+                <h6 class="card-subtitle mb-2 text-muted">Course ID : {{ course.id }}</h6>
+                <p class="card-text">{{ course.description }}</p>
+                <a href="{% url 'learning_material:course_detail' course %}" class="card-link">Course Details</a>
+                  <a href="{% url 'learning_material:edit_course' course.id %}" class="card-link">Edit Course</a>
+                  <a href="{% url 'learning_material:delete_course' course.name %}" class="card-link">Delete Course</a>
+              </div>
+            </div>
+        </div>
+    {% empty %}
+        <h1>No course with that name exists.</h1>
+    {% endfor %}
+</div>
+{% endblock %}

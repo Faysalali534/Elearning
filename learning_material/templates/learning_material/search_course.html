@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% load widget_tweaks %}
+
+{% block body %}
+    <input id="search_here" class="form-control" placeholder="type here to search..." />
+    <div id="box">
+        {% for item in object_list %}
+             <div class="card text-white bg-dark mb-3" style="width: 18rem;">
+                  <div class="card-body">
+                    <h5 class="card-title">{{ item }}</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">Course ID : {{ item.id }}</h6>
+                    <p class="card-text">{{ item.description }}</p>
+                    <a href="{% url 'learning_material:course_detail' item %}" class="card-link">Course Details</a>
+                      <a href="{% url 'learning_material:edit_course' item.id %}" class="card-link">Edit Course</a>
+                  </div>
+             </div>
+        {% endfor %}
+    </div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const data = '{{ qs_json }}'
+    console.log(data)
+
+    const rdata = JSON.parse(data.replace(/&quot;/g, '"'))
+    console.log(rdata)
+
+    const input = document.getElementById('search_here')
+    console.log(input)
+
+    let filterArr = []
+
+    input.addEventListener('keyup', (e)=>{
+        box.innerHTML = ""
+        filterArr = rdata.filter(info=> info['name'].includes(e.target.value))
+        console.log(filterArr)
+        if (filterArr.length > 0){
+            filterArr.map(info=>{
+                box.innerHTML +=
+                                `<div class="card text-white bg-dark mb-3" style="width: 18rem;">
+                  <div class="card-body">
+                    <h5 class="card-title">${info['name']}</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">Course ID :  ${info['id']} </h6>
+                    <p class="card-text"> ${info['description']} </p>
+                    <a href="{% url 'learning_material:course_detail' '${info["name"]}' %}" class="card-link">Course Details</a>
+
+                  </div>
+             </div><br>`
+            })
+        } else{
+            box.innerHTML = '<b>No results found...</b>'
+        }
+
+    })
+
+
+</script>
+{% endblock scripts %}
